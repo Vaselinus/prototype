@@ -29,7 +29,9 @@ import com.google.android.gms.maps.model.MarkerOptions;
 
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback,
-        GoogleMap.OnMarkerClickListener {
+        GoogleMap.OnMarkerClickListener,
+        GoogleMap.OnInfoWindowClickListener,
+        GoogleMap.OnMapLongClickListener{
 
     /* local variables */
     private boolean mPermissionDenied = false;
@@ -91,26 +93,25 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         mMap.getUiSettings().setMyLocationButtonEnabled(false);
         mMap.setOnMarkerClickListener(this);
         /* add marker when you click the map*/
-        mMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
-            @Override
-            public void onMapClick(LatLng latLng) {
-                if (isSocial) {
-                    if (null != mAdded) {
-                        mAdded.remove();
-                    }
-                    mAdded = mMap.addMarker(new MarkerOptions()
-                            .position(new LatLng(latLng.latitude, latLng.longitude))
-                            .icon(BitmapDescriptorFactory.fromResource(R.drawable.test_marker_parking))
-                            .title("Added marker"));
-                }
-
-            }
-        });
+        mMap.setOnMapLongClickListener(this);
 
         enableMyLocation();
         addUrbanObsPins();
+        mMap.setOnInfoWindowClickListener(this);
     }
 
+
+    public void onMapLongClick(LatLng latLng){
+        if (isSocial) {
+            if (null != mAdded) {
+                mAdded.remove();
+            }
+            mAdded = mMap.addMarker(new MarkerOptions()
+                    .position(new LatLng(latLng.latitude, latLng.longitude))
+                    .icon(BitmapDescriptorFactory.fromResource(R.drawable.test_marker_parking))
+                    .title("Added marker"));
+        }
+    }
     /* move the camera when app launched */
     private void startLocation(double lat, double lng, float zoom) {
         LatLng latl = new LatLng(lat, lng);
@@ -356,5 +357,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     }
 
+    /* Not implemented */
+    @Override
+    public void onInfoWindowClick(Marker marker) {
 
+    }
 }
