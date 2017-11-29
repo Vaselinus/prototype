@@ -6,6 +6,7 @@ package com.example.petym.map2;
   * Relative layout must be changed in the future*/
 
 import android.Manifest;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Bundle;
@@ -30,8 +31,7 @@ import com.google.android.gms.maps.model.MarkerOptions;
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback,
         GoogleMap.OnMarkerClickListener,
-        GoogleMap.OnInfoWindowClickListener,
-        GoogleMap.OnMapLongClickListener{
+        GoogleMap.OnMapLongClickListener {
 
     /* local variables */
     private boolean mPermissionDenied = false;
@@ -46,10 +46,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private static final LatLng STRAIN = new LatLng(54.972425, -1.623186);
     private static final LatLng TIDE = new LatLng(55.007379, -1.440368);
     private static final LatLng TRAFFIC = new LatLng(54.989564, -1.625078);
-    private static final LatLng WEATHER = new LatLng(54.972570, -1.623747);
+    private static final LatLng WEATHER = new LatLng(54.972570, -1.626747);
     private static final LatLng TEST = new LatLng(54.973627, -1.617512);
     private static final LatLng AQ = new LatLng(54.973853, -1.624552);
-    private static final LatLng ELEC = new LatLng(54.972153, -1.622894);
+    private static final LatLng ELEC = new LatLng(54.972153, -1.612894);
     private static final LatLng ENV = new LatLng(54.973681, -1.624917);
 
 
@@ -97,7 +97,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         enableMyLocation();
         addUrbanObsPins();
-        mMap.setOnInfoWindowClickListener(this);
+        CustomInfoWindowAdapter adapter = new CustomInfoWindowAdapter(MapsActivity.this);
+        mMap.setInfoWindowAdapter(adapter);
     }
 
 
@@ -132,7 +133,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         mStrain = mMap.addMarker(new MarkerOptions()
                 .position(STRAIN)
                 .title("Strain Guage")
-                .snippet("Live readings: Strain 2  63.04 strain")
+                .snippet("Strain 1\t   41.12 strain\n" +
+                        "Strain 4\t   50.17 strain\n" +
+                        "Strain 3\t   48.28 strain\n" +
+                        "Strain 2\t   40.27 strain")
                 .icon(BitmapDescriptorFactory.fromResource(R.drawable.test_marker_strain)));
 
 
@@ -140,49 +144,65 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 .position(TIDE)
                 .title("Tidal Level")
                 .icon(BitmapDescriptorFactory.fromResource(R.drawable.test_marker_tide))
-                .snippet("Live readings: Relative Tidal Level 0.29 mAOD"));
+                .snippet("Relative Tidal Level 0.29 mAOD"));
 
 
         mTraffic = mMap.addMarker(new MarkerOptions()
                 .position(TRAFFIC)
                 .title("Traffic")
                 .icon(BitmapDescriptorFactory.fromResource(R.drawable.test_marker_traffic))
-                .snippet("Live readings: Journey Time  82.00 seconds"));
+                .snippet("Journey Time  82.00 seconds"));
 
 
         mWeather = mMap.addMarker(new MarkerOptions()
                 .position(WEATHER)
                 .title("Weather")
-                .snippet("Live readings:  Temperature  11.30 Celsius")
+                .snippet("Temperature\t        1.30 Celsius\n" +
+                        "Rainfall\t                   0.00 mm\n" +
+                        "Humidity\t              91.00 %\n" +
+                        "Wind Speed\t           8.95 mph\n" +
+                        "Wind Direction\t 270.00 Bearing")
                 .icon(BitmapDescriptorFactory.fromResource(R.drawable.test_marker_weather)));
 
 
         mTest = mMap.addMarker(new MarkerOptions()
                 .position(TEST)
                 .title("High Precision Air Monitor")
-                .snippet("Live readings:  CO  299.33 ugm -3")
+                .snippet("Temperature      1.70 Celsius\n" +
+                        "NO                     11.10 ugm -3\n" +
+                        "O3                      23.06 ppb\n" +
+                        "Humidity           78.49 %\n" +
+                        "PM10                   5.57 ugm -3\n")
                 .icon(BitmapDescriptorFactory.fromResource(R.drawable.test_marker)));
 
 
         mAq = mMap.addMarker(new MarkerOptions()
                 .position(AQ)
                 .title("Air Quality")
-                .snippet("Live readings:  Particle Count  42.49 Kgm -3")
+                .snippet("Temperature\t  0.45 Celsius\n" +
+                        "NO\t                  205.75 ugm -3\n" +
+                        "Humidity\t         85.10 %\n" +
+                        "Sound\t            73.50 db\n" +
+                        "CO\t                   684.27 ugm -3\n" +
+                        "NO2\t                  77.91 ugm -3")
                 .icon(BitmapDescriptorFactory.fromResource(R.drawable.test_marker_aq)));
 
 
         mElec = mMap.addMarker(new MarkerOptions()
                 .position(ELEC)
-                .title("Electrical")
+                .title("Electrical sensor")
                 .icon(BitmapDescriptorFactory.fromResource(R.drawable.test_marker_elec))
-                .snippet("Live readings:  NOXasNO2 Concentration  31.94 ugm "));
+                .snippet("Real Power\t  77.65 +kW"));
 
 
         mEnv = mMap.addMarker(new MarkerOptions()
                 .position(ENV)
-                .title("Eviromental")
+                .title("Eviromental sensor")
                 .icon(BitmapDescriptorFactory.fromResource(R.drawable.test_marker_env))
-                .snippet("Live readings:  Real Power  57.35 +kW"));
+                .snippet("Non-volatile PM2.5\t    1.50 ugm -3\n" +
+                        "Volatile PM10\t             1.40 ugm -3\n" +
+                        "PM2.5\t                        2.60 ugm -3\n" +
+                        "NO Concentration\t  13.22 ugm -3"));
 
 
         isSocial = true;
@@ -357,9 +377,14 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     }
 
-    /* Not implemented */
-    @Override
-    public void onInfoWindowClick(Marker marker) {
 
+    /* back button listener, returns to homescreen  */
+    @Override
+    public void onBackPressed() {
+        Intent intent = new Intent(Intent.ACTION_MAIN);
+        intent.addCategory(Intent.CATEGORY_HOME);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        startActivity(intent);
     }
+
 }
